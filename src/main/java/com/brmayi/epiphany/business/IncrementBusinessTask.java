@@ -1,5 +1,6 @@
 package com.brmayi.epiphany.business;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -13,12 +14,14 @@ import org.slf4j.LoggerFactory;
 
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.service.DataService;
-import com.brmayi.epiphany.service.util.TaskUtilService;
 
 public class IncrementBusinessTask implements Runnable{
 	private static final Logger logger = LoggerFactory.getLogger(IncrementBusinessTask.class);
 	public static final int MEMCAHE_EXPIRE_TIME = 24*3600;
 	public static final int RUN_END_TIME = -1;
+	public static final int RUN_INTERVAL = -1;
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	
     @Resource
     private MemcachedClient memcacheClient;
     
@@ -36,11 +39,11 @@ public class IncrementBusinessTask implements Runnable{
 		try {
 			String lastTime = memcacheClient.get(cacheKey);
 			if(StringUtils.isEmpty(lastTime)) {
-				lastTime = TaskUtilService.getNewTime(Calendar.SECOND,-2*TaskUtilService.ALBUM_RUN_INTERVAL+TaskUtilService.ALBUM_RUN_END_TIME);
+				lastTime = getNewTime(Calendar.SECOND,-2*RUN_INTERVAL+RUN_END_TIME);
 			} else {
 				logger.info("lastTime{}", lastTime);
 			}
-			String endTime = TaskUtilService.getNewTime(Calendar.SECOND, RUN_END_TIME); //当前时间
+			String endTime = getNewTime(Calendar.SECOND, RUN_END_TIME); //当前时间
 			memcacheClient.set(cacheKey, MEMCAHE_EXPIRE_TIME, endTime);
 			List<Long> ids = dataService.getIds(lastTime, endTime);
 			dataService.dealData(ids);
@@ -49,5 +52,18 @@ public class IncrementBusinessTask implements Runnable{
 			throw new EpiphanyException(e);
 		}
 	}
-	
+    
+    /**
+     * 取当前时间
+     * @return 当前时间
+     */
+	private static String getNewTime(Integer timeUnit, int interval) {
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+    	Calendar date = Calendar.getInstance();
+		if(timeUnit!=null) {
+			date.set(timeUnit, date.get(timeUnit)+interval);
+		}
+    	String newTime = sdf.format(date.getTime());
+    	return newTime;
+    }
 }

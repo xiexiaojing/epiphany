@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.service.DataService;
-import com.brmayi.epiphany.service.util.TaskUtilService;
 import com.brmayi.epiphany.util.EpiphanyFileUtil;
 import com.brmayi.epiphany.util.GzCompressUtil;
 
@@ -72,7 +71,7 @@ public class FullBusinessTask implements Runnable {
 			}
 			LOGGER.info("threadNo:{},begin:{},end:{},left undeal:{}, begin", threadNo, curId, count, count-curId);
 			dataService.dealData(ids);
-			LOGGER.info("threadNo:{}, use ms:{}, thread count in progress:{}", threadNo, (System.currentTimeMillis()-beginTime), TaskUtilService.albumThreadNumber.get());
+			LOGGER.info("threadNo:{}, use ms:{}, thread count in progress:{}", threadNo, (System.currentTimeMillis()-beginTime), threadNumber.get());
 			curId = endThisTime;
 		}
 		GzCompressUtil.gzCompress(path);//压缩

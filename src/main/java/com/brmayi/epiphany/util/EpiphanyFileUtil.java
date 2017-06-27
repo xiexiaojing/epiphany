@@ -9,8 +9,6 @@ import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.brmayi.epiphany.service.util.TaskUtilService;
-
 public class EpiphanyFileUtil {
 	private final static Logger LOGGER = LoggerFactory.getLogger(EpiphanyFileUtil.class); 
 	
