@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+		http://www.springframework.org/schema/context  
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+		http://www.springframework.org/schema/task 
+		http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+	
+	<context:component-scan base-package="com.brmayi.epiphany" />
+    <bean id="configroperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:properties/config.properties</value>
+            </list>
+        </property>
+    </bean>
+	<task:executor id="executor" pool-size="5" />
+    <task:scheduler id="scheduler" pool-size="10" />  
+    <task:annotation-driven executor="executor" scheduler="scheduler" />
+
+	<!-- 配置生产者连接工厂 -->
+    <bean id="jmsConnectionFactory" class="org.apache.qpid.client.AMQConnectionFactory">
+        <constructor-arg index="0" value="${JMS_PROVIDER_CONNECTION_URL}"/>
+    </bean>
+    
+    <bean id="cacheConnFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+    	<constructor-arg name="targetConnectionFactory" ref="jmsConnectionFactory"></constructor-arg>
+    	<property name="sessionCacheSize" value="100"></property>
+	</bean>
+    
+    <!-- 配置template,传入连接工厂 -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cacheConnFactory"/>
+        <property name="messageConverter" ref="jmsMessageConverter"/>
+    </bean>
+    
+    <bean id="jmsMessageConverter" class="com.letv.common.rabbitmq.convert.JmsMessageConverter" />
+   
+    <bean id="videoDestination" class="org.apache.qpid.client.AMQAnyDestination">
+        <constructor-arg index="0"  value="letv.mms.search.transmission.video.exchange"/>
+    </bean>
+    <bean id="albumDestination" class="org.apache.qpid.client.AMQAnyDestination">
+        <constructor-arg index="0"  value="letv.mms.search.transmission.album.exchange"/>
+    </bean>
+    <!-- 搜索数据同步专用生产者队列
+    <bean id="videoDestination" class="org.apache.qpid.client.AMQAnyDestination">
+        <constructor-arg index="0"  value="letv.mms.search.transmission.exchage/lesocms.transmission.queue"/>
+    </bean>
+    <bean id="albumDestination" class="org.apache.qpid.client.AMQAnyDestination">
+        <constructor-arg index="0"  value="letv.mms.search.transmission.exchage/lesocms.transmission.queue"/>
+    </bean> -->
+    <bean id="memcachedClient" factory-bean="memcachedClientBuilder"
+		factory-method="build" destroy-method="shutdown">
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder">
+				<property name="compressionThreshold" value="1024" />
+			</bean>
+		</property>
+	</bean>
+	<bean name="memcachedClientBuilder" class="net.rubyeye.xmemcached.XMemcachedClientBuilder">
+		<constructor-arg>
+			<list>
+				<bean class="java.net.InetSocketAddress">
+					<constructor-arg>
+						<value>${mms.cbase.address}</value>
+					</constructor-arg>
+					<constructor-arg>
+						<value>${mms.cbase.port}</value>
+					</constructor-arg>
+				</bean>
+			</list>
+		</constructor-arg>
+		<property name="connectionPoolSize" value="50"></property>
+	</bean>
+</beans>
