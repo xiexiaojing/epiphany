@@ -6,12 +6,12 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import net.rubyeye.xmemcached.MemcachedClient;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import com.brmayi.epiphany.common.Startup;
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.service.DataService;
 
@@ -21,33 +21,41 @@ public class IncrementBusinessTask implements Runnable{
 	public static final int RUN_END_TIME = -1;
 	public static final int RUN_INTERVAL = -1;
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-	
-    @Resource
-    private MemcachedClient memcacheClient;
-    
-    @Resource
+  
+	@Resource
+    private RedisTemplate<String,String> redisTemplate;
+
     private DataService dataService;
     
-    private String cacheKey;
+    private String timeCacheKey="timeCacheKey";
+    
+	public void setTimeCacheKey(String timeCacheKey) {
+		this.timeCacheKey = timeCacheKey;
+	}
 
-	public void setCacheKey(String cacheKey) {
-		this.cacheKey = cacheKey;
+	public void setDataService(DataService dataService) {
+		this.dataService = dataService;
 	}
 
 	@Override
 	public void run() throws EpiphanyException{
+		if(Startup.isRunning) {
+			return;
+		}
 		try {
-			String lastTime = memcacheClient.get(cacheKey);
+			String lastTime = redisTemplate.opsForValue().get(timeCacheKey);
 			if(StringUtils.isEmpty(lastTime)) {
 				lastTime = getNewTime(Calendar.SECOND,-2*RUN_INTERVAL+RUN_END_TIME);
 			} else {
 				logger.info("lastTime{}", lastTime);
 			}
 			String endTime = getNewTime(Calendar.SECOND, RUN_END_TIME); //当前时间
-			memcacheClient.set(cacheKey, MEMCAHE_EXPIRE_TIME, endTime);
+			redisTemplate.opsForValue().set(timeCacheKey, endTime);
 			List<Long> ids = dataService.getIds(lastTime, endTime);
-			dataService.dealData(ids);
+			dataService.dealDataByIds(ids, null);
 			ids = null;
+	        //更新时间戳
+			lastTime = endTime;
 		} catch(Exception e) {
 			throw new EpiphanyException(e);
 		}

@@ -5,60 +5,86 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.TimerTask;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
-import com.brmayi.epiphany.strategy.ThreadDistributionStrategy;
+import com.brmayi.epiphany.common.Startup;
+import com.brmayi.epiphany.service.DataService;
 import com.brmayi.epiphany.util.EpiphanyFileUtil;
 
-public class FullStartupTask implements Runnable {
+public class FullStartupTask  extends TimerTask {
 	private final static Logger LOGGER = LoggerFactory.getLogger(FullStartupTask.class);
-	
-	private String filePath;
-	
-	@Resource
-	private ThreadDistributionStrategy strategy;
-	
-	private int threadCount;
-	
-	private Object[] objects;
-	
-	public FullStartupTask(String filePath, ThreadDistributionStrategy strategy, int threadCount, Object[] objects) {
-		this.filePath = filePath;
-		this.strategy = strategy;
-		this.threadCount = threadCount;
-		this.objects = objects;
+    
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
+	private String fullPath="/data/epiphany";
+    private DataService dataService=null;
+	private int dealOneTime = 200;
+	private String redisNoKey = "epiphanyNo";
+
+	public void setFullPath(String fullPath) {
+		this.fullPath = fullPath;
+	}
+
+	public void setDataService(DataService dataService) {
+		this.dataService = dataService;
+	}
+
+	public void setDealOneTime(int dealOneTime) {
+		this.dealOneTime = dealOneTime;
+	}
+
+	public void setRedisNoKey(String redisNoKey) {
+		this.redisNoKey = redisNoKey;
 	}
 	
 	@Override
 	public void run() {
+		Startup.isRunning=true;
+		redisTemplate.opsForValue().set(redisNoKey, "0");
 		clearData();
-		EpiphanyFileUtil.createPath(filePath);
-		List<FullBusinessTask> threads = strategy.getStrategy(threadCount, filePath, objects);
-		ExecutorService executor = Executors.newFixedThreadPool(50);
-		for(FullBusinessTask t : threads) {
-			executor.execute(t);
-		}
+		EpiphanyFileUtil.createPath(fullPath);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		String maxKey = new StringBuilder("max").append(redisNoKey).toString();
+    	String maxId = valueOperations.get(maxKey);
+    	if(maxId==null) {
+    		maxId = String.valueOf(dataService.getMaxId());
+    		valueOperations.set(maxKey, maxId);
+    	}
+    	String minKey = new StringBuilder("min").append(redisNoKey).toString();
+    	String minId = valueOperations.get(minKey);
+    	if(minId==null) {
+    		minId = String.valueOf(dataService.getMinId());
+    		valueOperations.set(minKey, minId);
+    	}
+    	for(int i=0; i<Startup.FULL_THREAD_TOTAL; i++) {
+    		FullBusinessTask fullBusinessTask = (FullBusinessTask) Startup.context.getBean("fullBusinessTask");
+    		fullBusinessTask.setMinId(NumberUtils.toLong(minId));
+    		fullBusinessTask.setMaxId(NumberUtils.toLong(maxId));
+    		fullBusinessTask.setThreadNo(i);
+    		fullBusinessTask.setFullPath(fullPath);
+    		fullBusinessTask.setDataService(dataService);
+    		fullBusinessTask.setDealOneTime(dealOneTime);
+    		fullBusinessTask.setRedisNoKey(redisNoKey);
+    		Startup.service.execute(fullBusinessTask);
+        }
 	}
 
-    
 	private void clearData() {
 		 SimpleDateFormat sdfForDir = new SimpleDateFormat("yyyyMMdd");
 		 Calendar now = Calendar.getInstance();
-		 File dir = new File(filePath);
+		 File dir = new File(fullPath);
 		 if (dir.isDirectory()) {
-            String[] children = dir.list();
             //递归删除目录中的子目录下
-            for (int i=0; i<children.length; i++) {
-               File division = new File(new StringBuffer(filePath).append("/").append(children[i]).toString());
-               if(division.isDirectory()) {
-            	   String[] dateDirs = division.list();
+               if(dir.isDirectory()) {
+            	   String[] dateDirs = dir.list();
             	   for(int j=0; j<dateDirs.length; j++) {
             		   if(dateDirs[j]!=null) {
 	            		   Date date = null;
@@ -68,13 +94,11 @@ public class FullStartupTask implements Runnable {
 								LOGGER.error("日期解析错误", e);
 							}
 	        			  if(now.getTimeInMillis()-date.getTime()>2*24*3600*1000) {
-	        				  deleteDir(new File(new StringBuffer(filePath).append("/").append(children[i]).append("/").append(dateDirs[j]).toString()));
+	        				  deleteDir(new File(new StringBuffer(fullPath).append("/").append(dateDirs[j]).toString()));
 	        			  }
             		   }
             	   }
                }
-               
-            }
         }
 	 }
 	 

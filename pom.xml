@@ -17,6 +17,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
 		  <groupId>org.slf4j</groupId>
 		  <artifactId>slf4j-api</artifactId>
 		  <version>1.7.21</version>
@@ -56,22 +61,6 @@
            <artifactId>spring-aop</artifactId>
            <version>${spring.version}</version>
        </dependency>
-       <dependency>
-           <groupId>org.aspectj</groupId>
-           <artifactId>aspectjrt</artifactId>
-           <version>1.6.11</version>
-       </dependency>
-
-       <dependency>
-           <groupId>org.aspectj</groupId>
-           <artifactId>aspectjweaver</artifactId>
-           <version>1.6.11</version>
-       </dependency>
-         <dependency>
-             <groupId>javassist</groupId>
-             <artifactId>javassist</artifactId>
-             <version>3.9.0.GA</version>
-         </dependency>
 	   <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
@@ -92,14 +81,14 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
          <dependency>
              <groupId>org.springframework</groupId>
              <artifactId>spring-jms</artifactId>
+             <version>${spring.version}</version>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework</groupId>
+             <artifactId>spring-jdbc</artifactId>
              <version>${spring.version}</version>
          </dependency>
         <dependency>
@@ -117,17 +106,41 @@
              <artifactId>spring-webmvc</artifactId>
              <version>${spring.version}</version>
          </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>1.8.4.RELEASE</version>
+        </dependency>
+        <dependency>
+		  <groupId>redis.clients</groupId>
+		  <artifactId>jedis</artifactId>
+		  <version>2.9.0</version>
+		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
 			<version>1.1.41</version>
 		</dependency>
+		<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.26</version>
+        </dependency>
+         <dependency>
+             <groupId>commons-dbcp</groupId>
+             <artifactId>commons-dbcp</artifactId>
+             <version>1.4</version>
+         </dependency>
         <dependency>
 		  <groupId>com.googlecode.log4jdbc</groupId>
 		  <artifactId>log4jdbc</artifactId>
 		  <version>1.2</version>
 		</dependency>
-		<!-- Janino优化编译主要实现将字符串编译为类然后加载使用，一次编译，多次求值，循环中的表达式结构，始终不会改变。十分适用于大数据量的算法。 -->
+		<dependency>
+		    <groupId>org.jfaster</groupId>
+		    <artifactId>mango</artifactId>
+		    <version>1.4.1</version>
+		</dependency>
 		<dependency>
 		  <groupId>org.codehaus.janino</groupId>
 		  <artifactId>janino</artifactId>
@@ -144,14 +157,25 @@
 		  <version>4.1.7.Final</version>
 		</dependency>
 		<dependency>
-			<groupId>com.googlecode.xmemcached</groupId>
-			<artifactId>xmemcached</artifactId>
-			<version>1.4.2</version>
+		  <groupId>net.sf.json-lib</groupId>
+		  <artifactId>json-lib</artifactId>
+		  <version>2.4</version>
+		  <classifier>jdk15</classifier>
 		</dependency>
 		<dependency>
 		  <groupId>javax.jms</groupId>
 		  <artifactId>javax.jms-api</artifactId>
 		  <version>2.0.1</version>
+		</dependency>
+		<dependency>
+		  <groupId>xerces</groupId>
+		  <artifactId>xercesImpl</artifactId>
+		  <version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.16</version>
 		</dependency>
 	</dependencies>
 	
@@ -306,4 +330,30 @@
             </plugins>
         </pluginManagement>
 	</build>
+	
+	<pluginRepositories>
+        <pluginRepository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>project-release</id>
+            <name>Projects Release repository</name>
+            <url>http://maven.letv.cn/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>project-snapshots</id>
+            <name>Projects SnapShot repository</name>
+            <url>http://maven.letv.cn/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

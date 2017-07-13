@@ -36,7 +36,7 @@ import com.brmayi.epiphany.pool.UnlimitedKeyedPoolableObjectFactory;
  */
 public class GzCompressUtil {
 	private final static Logger LOGGER = LoggerFactory.getLogger(GzCompressUtil.class);
-	private static final ExecutorService fixedThreadPoolForGz = Executors.newFixedThreadPool(2);
+	private static final ExecutorService fixedThreadPoolForGz = Executors.newFixedThreadPool(6);
     
     public static void gzCompress(String path) throws EpiphanyException {
 		try {
