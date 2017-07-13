@@ -330,7 +330,16 @@
             </plugins>
         </pluginManagement>
 	</build>
-	
+	<repositories>
+	    <repository>
+	        <id>maven-repo-master</id>
+	        <url>https://raw.githubusercontent.com/xiexiaojing/maven-repo/master/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>always</updatePolicy>
+	        </snapshots>
+	    </repository>
+	</repositories>
 	<pluginRepositories>
         <pluginRepository>
             <id>jboss-public-repository-group</id>
