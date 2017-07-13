@@ -38,6 +38,11 @@ public class GzCompressUtil {
 	private final static Logger LOGGER = LoggerFactory.getLogger(GzCompressUtil.class);
 	private static final ExecutorService fixedThreadPoolForGz = Executors.newFixedThreadPool(6);
     
+	/**
+	 * 执行gz压缩
+	 * @param path 文件路径
+	 * @throws EpiphanyException 抛出压缩异常
+	 */
     public static void gzCompress(String path) throws EpiphanyException {
 		try {
 	    	GzCompress gzCompressTask = (GzCompress) UnlimitedKeyedPoolableObjectFactory.objectPool.borrowObject(GzCompress.class.getName());

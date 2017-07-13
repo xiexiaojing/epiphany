@@ -9,9 +9,31 @@ import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 		文件处理工具类
+ * 
+ *            
+ *            .==.       .==.
+ *           //'^\\     //^'\\
+ *          // ^^\(\__/)/^ ^^\\
+ *         //^ ^^ ^/6  6\ ^^^ \\
+ *        //^ ^^ ^/( .. )\^ ^^ \\
+ *       // ^^  ^/\|v""v|/\^^ ^ \\
+ *      // ^^/\/  / '~~' \ \/\^ ^\\
+ *      ----------------------------------------
+ *      HERE BE DRAGONS WHICH CAN CREATE MIRACLE
+ *       
+ *      @author 静儿(987489055@qq.com)
+ *
+ */
 public class EpiphanyFileUtil {
 	private final static Logger LOGGER = LoggerFactory.getLogger(EpiphanyFileUtil.class); 
 	
+	/**
+	 * 或缺文件路径
+	 * @param filePath 文件根路径
+	 * @return 加上当前时间目录的路径
+	 */
 	public static StringBuilder getPath(String filePath) {
 		SimpleDateFormat sdfForDir = new SimpleDateFormat("yyyyMMdd");
 		Calendar date = Calendar.getInstance();
@@ -21,8 +43,8 @@ public class EpiphanyFileUtil {
 	
 	/**
 	 * 创建磁盘目录
-	 * @param division 目录区分
-	 * @return
+	 * @param filePath 文件根路径
+	 * @return 加上当前时间目录的路径
 	 */
 	public static String createPath(String filePath) {
 		SimpleDateFormat sdfForDir = new SimpleDateFormat("yyyyMMdd");

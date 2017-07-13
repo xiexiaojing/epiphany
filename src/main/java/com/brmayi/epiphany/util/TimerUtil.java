@@ -24,6 +24,14 @@ import java.util.TimerTask;
 public class TimerUtil {
 	 private static final long PERIOD_DAY = 24 * 60 * 60 * 1000;
 	 private static final Timer timer = new Timer();
+	 
+	 /**
+	  * 每天执行一次的定时器
+	  * @param task 要执行的定时任务
+	  * @param hour 几点执行
+	  * @param minute 几分执行
+	  * @param second 几秒执行
+	  */
 	 public static void runEveryday(TimerTask task, int hour, int minute, int second) {
 		 Calendar calendar = Calendar.getInstance();
 		 calendar.set(Calendar.HOUR_OF_DAY, hour);
@@ -37,7 +45,7 @@ public class TimerUtil {
 	 }
 	 
 	 // 增加或减少天数
-	 public static Date addDay(Date date, int num) {
+	 private static Date addDay(Date date, int num) {
 		Calendar startDT = Calendar.getInstance();
 		startDT.setTime(date);
 		startDT.add(Calendar.DAY_OF_MONTH, num);
