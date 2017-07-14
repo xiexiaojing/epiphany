@@ -8,3 +8,5 @@
 
 D:\xiexiaoing>mvn deploy -DlocalRepositoryPath=/com/brmayi/repository -DcreateCh
 ecksum=true
+
+git push origin master
