@@ -1,19 +1,16 @@
 package com.brmayi.epiphany.util;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.Deflater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.pool.UnlimitedKeyedPoolableObjectFactory;
+import com.brmayi.epiphany.util.sub.GzCompress;
 
 /**
  * 
@@ -38,6 +35,36 @@ public class GzCompressUtil {
 	private final static Logger LOGGER = LoggerFactory.getLogger(GzCompressUtil.class);
 	private static final ExecutorService fixedThreadPoolForGz = Executors.newFixedThreadPool(6);
     
+	  
+    /** 
+     * 压缩 
+     *  
+     * @param data 
+     *            待压缩数据 
+     * @return byte[] 压缩后的数据 
+     */  
+    public static byte[] compress(byte[] data) {
+        byte[] output = new byte[0];  
+  
+        Deflater compresser = new Deflater();  
+        compresser.reset();  
+        compresser.setInput(data);  
+        compresser.finish();  
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length)){  
+            byte[] buf = new byte[data.length];  
+            while (!compresser.finished()) {  
+                int i = compresser.deflate(buf);  
+                bos.write(buf, 0, i);  
+            }  
+            output = bos.toByteArray();  
+        } catch (Exception e) {  
+            output = data;  
+            LOGGER.error("队列消息压缩错误", e);
+        }
+        compresser.end();  
+        return output;  
+    }
+    
 	/**
 	 * 执行gz压缩
 	 * @param path 文件路径
@@ -51,35 +78,6 @@ public class GzCompressUtil {
 		} catch(Exception e) {
 			LOGGER.error("gzcompress exception", e);
 			throw new EpiphanyException(e);
-		}
-    }
-    
-    private class GzCompress implements Runnable {
-    	private String path;
-    	
-        public void setPath(String path) {
-    		this.path = path;
-    	}
-        
-		/**
-	     * hadoop支持gz格式自解压，gz可以压缩到原文本文件的1/7
-	     * 
-	     * @param path 压缩的文件路径
-	     */
-		@Override
-		public void run() {
-	       	try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(path));
-	    		GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(path+".gz"));){
-	    		byte[] array = new byte[1024];
-			    int number = -1;
-			    while((number = in.read(array, 0, array.length)) != -1) {
-			    	out.write(array, 0, number);
-			    }
-			} catch (FileNotFoundException e) {
-				LOGGER.error("压缩错误", e);
-			} catch (IOException e) {
-				LOGGER.error("压缩错误", e);
-			}
 		}
     }
 }

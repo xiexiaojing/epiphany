@@ -6,7 +6,7 @@
 	<groupId>com.brmayi</groupId>
 	<artifactId>epiphany</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1</version>
+	<version>0.4</version>
 	<name>epiphany</name>
 
     <properties>
