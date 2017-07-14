@@ -11,19 +11,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.brmayi.epiphany.util.GzCompressUtil;
-
+/**
+ * 
+ * 
+ *            
+ *            .==.       .==.
+ *           //'^\\     //^'\\
+ *          // ^^\(\__/)/^ ^^\\
+ *         //^ ^^ ^/6  6\ ^^^ \\
+ *        //^ ^^ ^/( .. )\^ ^^ \\
+ *       // ^^  ^/\|v""v|/\^^ ^ \\
+ *      // ^^/\/  / '~~' \ \/\^ ^\\
+ *      ----------------------------------------
+ *      HERE BE DRAGONS WHICH CAN CREATE MIRACLE
+ *       
+ *      @author 静儿(987489055@qq.com)
+ *
+ */
 public class GzCompress implements Runnable {
 	private String path;
 	private final static Logger LOGGER = LoggerFactory.getLogger(GzCompressUtil.class);
-	
+	/**
+     * hadoop支持gz格式自解压，gz可以压缩到原文本文件的1/7
+     * 
+     * @param path 压缩的文件路径
+     */
     public void setPath(String path) {
 		this.path = path;
 	}
         
-		/**
+	/**
      * hadoop支持gz格式自解压，gz可以压缩到原文本文件的1/7
      * 
-     * @param path 压缩的文件路径
      */
 	@Override
 	public void run() {

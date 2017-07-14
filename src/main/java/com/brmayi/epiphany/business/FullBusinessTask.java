@@ -3,8 +3,6 @@
  */
 package com.brmayi.epiphany.business;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.annotation.Resource;
 
 import org.perf4j.StopWatch;
@@ -37,7 +35,7 @@ import com.brmayi.epiphany.util.GzCompressUtil;
  */
 public class FullBusinessTask implements Runnable {
 	private final static Logger LOGGER = LoggerFactory.getLogger(FullBusinessTask.class);
-	protected static final AtomicInteger threadNumber = new AtomicInteger(0);
+	
 	private static final String EMPTY = "";
 
 	private int threadNo=0;
@@ -80,7 +78,7 @@ public class FullBusinessTask implements Runnable {
 
 	@Override
 	public void run() throws EpiphanyException {
-		threadNumber.incrementAndGet();
+		Startup.threadNumber.incrementAndGet();
 		StringBuilder pathBuilder = EpiphanyFileUtil.getPath(fullPath);
 		String path = pathBuilder.append(threadNo).toString();
 		long endThisTime = redisTemplate.opsForValue().increment(redisNoKey, dealOneTime);
@@ -94,8 +92,8 @@ public class FullBusinessTask implements Runnable {
 		}
 		
 		GzCompressUtil.gzCompress(path);//压缩
-		threadNumber.decrementAndGet();
-		if(threadNumber.get()==0) {
+		Startup.threadNumber.decrementAndGet();
+		if(Startup.threadNumber.get()==0) {
 			LOGGER.info("fullExecute generate success");
 			EpiphanyFileUtil.writeToFile(pathBuilder.append("success").toString(), EMPTY);
 			Startup.isRunning =false;

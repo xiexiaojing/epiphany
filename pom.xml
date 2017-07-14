@@ -6,7 +6,7 @@
 	<groupId>com.brmayi</groupId>
 	<artifactId>epiphany</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4</version>
+	<version>0.5</version>
 	<name>epiphany</name>
 
     <properties>
@@ -354,15 +354,9 @@
         </pluginRepository>
     </pluginRepositories>
     <distributionManagement>
-        <repository>
-            <id>project-release</id>
-            <name>Projects Release repository</name>
-            <url>http://maven.letv.cn/nexus/content/repositories/releases/</url>
+         <repository>
+            <id>localRepository</id>
+            <url>file:D:/com/brmayi/repository</url>
         </repository>
-        <snapshotRepository>
-            <id>project-snapshots</id>
-            <name>Projects SnapShot repository</name>
-            <url>http://maven.letv.cn/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 </project>
