@@ -95,7 +95,12 @@ public class FullBusinessTask implements Runnable {
 		Startup.threadNumber.decrementAndGet();
 		if(Startup.threadNumber.get()==0) {
 			LOGGER.info("fullExecute generate success");
-			EpiphanyFileUtil.writeToFile(pathBuilder.append("success").toString(), EMPTY);
+			String division = fullPath.substring(fullPath.lastIndexOf("/")+1, fullPath.length());
+			EpiphanyFileUtil.writeToFile(pathBuilder.append(division).append("success").toString(), EMPTY);
+			String maxKey = new StringBuilder("max").append(redisNoKey).toString();
+			String minKey = new StringBuilder("min").append(redisNoKey).toString();
+			redisTemplate.delete(maxKey);
+			redisTemplate.delete(minKey);
 			Startup.isRunning =false;
 		}
 	}
