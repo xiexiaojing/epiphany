@@ -34,11 +34,11 @@ public class EpiphanyFileUtil {
 	 * @param filePath 文件根路径
 	 * @return 加上当前时间目录的路径
 	 */
-	public static StringBuilder getPath(String filePath) {
+	public static String getPath(String filePath) {
 		SimpleDateFormat sdfForDir = new SimpleDateFormat("yyyyMMdd");
 		Calendar date = Calendar.getInstance();
 		String dateFormat = sdfForDir.format(date.getTime());
-	    return new StringBuilder(filePath).append("/").append(dateFormat).append("/");
+	    return new StringBuilder(filePath).append("/").append(dateFormat).append("/").toString();
     }
 	
 	/**

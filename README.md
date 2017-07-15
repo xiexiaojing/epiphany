@@ -6,7 +6,6 @@
 3>手动补发数据
 
 
-D:\xiexiaoing>mvn deploy -DlocalRepositoryPath=/com/brmayi/repository -DcreateCh
-ecksum=true
+D:\xiexiaoing>mvn deploy -DlocalRepositoryPath=/com/brmayi/repository -DcreateChecksum=true
 
 git push origin master

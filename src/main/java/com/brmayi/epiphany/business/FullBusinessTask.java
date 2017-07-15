@@ -79,8 +79,8 @@ public class FullBusinessTask implements Runnable {
 	@Override
 	public void run() throws EpiphanyException {
 		Startup.threadNumber.incrementAndGet();
-		StringBuilder pathBuilder = EpiphanyFileUtil.getPath(fullPath);
-		String path = pathBuilder.append(threadNo).toString();
+		String pathWithDate = EpiphanyFileUtil.getPath(fullPath);
+		String path = new StringBuilder(pathWithDate).append(threadNo).toString();
 		long endThisTime = redisTemplate.opsForValue().increment(redisNoKey, dealOneTime);
 		long curId = minId+endThisTime-dealOneTime;
 		while (curId <= maxId) {
@@ -96,7 +96,7 @@ public class FullBusinessTask implements Runnable {
 		if(Startup.threadNumber.get()==0) {
 			LOGGER.info("fullExecute generate success");
 			String division = fullPath.substring(fullPath.lastIndexOf("/")+1, fullPath.length());
-			EpiphanyFileUtil.writeToFile(pathBuilder.append(division).append("success").toString(), EMPTY);
+			EpiphanyFileUtil.writeToFile(new StringBuilder(pathWithDate).append(division).append("success").toString(), EMPTY);
 			String maxKey = new StringBuilder("max").append(redisNoKey).toString();
 			String minKey = new StringBuilder("min").append(redisNoKey).toString();
 			redisTemplate.delete(maxKey);
