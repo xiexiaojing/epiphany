@@ -47,7 +47,6 @@ public class FullStartupTask  extends TimerTask {
 	
 	@Override
 	public void run() {
-		Startup.isRunning=true;
 		redisTemplate.opsForValue().set(redisNoKey, "0");
 		clearData();
 		EpiphanyFileUtil.createPath(fullPath);
@@ -64,6 +63,7 @@ public class FullStartupTask  extends TimerTask {
     		minId = String.valueOf(dataService.getMinId());
     		valueOperations.set(minKey, minId);
     	}
+    	Startup.isRunning=true;
     	for(int i=0; i<Startup.FULL_THREAD_TOTAL; i++) {
     		FullBusinessTask fullBusinessTask = (FullBusinessTask) Startup.context.getBean("fullBusinessTask");
     		fullBusinessTask.setMinId(NumberUtils.toLong(minId));
