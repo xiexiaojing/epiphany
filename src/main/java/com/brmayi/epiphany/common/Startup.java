@@ -13,4 +13,5 @@ public class Startup {
 	public static ExecutorService service = Executors.newFixedThreadPool(FULL_THREAD_TOTAL);
 	public static boolean isRunning = false;
 	public static final AtomicInteger threadNumber = new AtomicInteger(0);
+	public static final AtomicInteger gzThreadNumber = new AtomicInteger(0);
 }

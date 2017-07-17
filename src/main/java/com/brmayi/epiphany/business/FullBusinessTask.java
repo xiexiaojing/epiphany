@@ -91,7 +91,7 @@ public class FullBusinessTask implements Runnable {
 			curId = endThisTime-dealOneTime;
 		}
 		
-		GzCompressUtil.gzCompress(path);//压缩
+		GzCompressUtil.compressFile(path);//压缩
 		Startup.threadNumber.decrementAndGet();
 		if(Startup.threadNumber.get()==0) {
 			LOGGER.info("fullExecute generate success");

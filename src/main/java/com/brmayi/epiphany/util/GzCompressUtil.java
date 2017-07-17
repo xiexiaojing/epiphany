@@ -1,9 +1,15 @@
 package com.brmayi.epiphany.util;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.Deflater;
+import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +76,7 @@ public class GzCompressUtil {
 	 * @param path 文件路径
 	 * @throws EpiphanyException 抛出压缩异常
 	 */
+    @Deprecated
     public static void gzCompress(String path) throws EpiphanyException {
 		try {
 	    	GzCompress gzCompressTask = (GzCompress) UnlimitedKeyedPoolableObjectFactory.objectPool.borrowObject(GzCompress.class.getName());
@@ -80,4 +87,26 @@ public class GzCompressUtil {
 			throw new EpiphanyException(e);
 		}
     }
+    
+    /**
+     * 同步压缩，为了好计算是否终止状态，将来真正有需求可以支持同步和异步两种模式
+     * @param path 文件路径
+	 * @throws EpiphanyException 抛出压缩异常
+     */
+	public static void compressFile(String path)  throws EpiphanyException {
+       	try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(path));
+    		GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(path+".gz"));){
+    		byte[] array = new byte[1024];
+		    int number = -1;
+		    while((number = in.read(array, 0, array.length)) != -1) {
+		    	out.write(array, 0, number);
+		    }
+		} catch (FileNotFoundException e) {
+			LOGGER.error("压缩错误", e);
+			throw new EpiphanyException(e);
+		} catch (IOException e) {
+			LOGGER.error("压缩错误", e);
+			throw new EpiphanyException(e);
+		}
+	}
 }
