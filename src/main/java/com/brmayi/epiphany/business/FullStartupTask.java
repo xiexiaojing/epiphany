@@ -5,7 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
@@ -21,7 +24,9 @@ import com.brmayi.epiphany.util.EpiphanyFileUtil;
 
 public class FullStartupTask  extends TimerTask {
 	private final static Logger LOGGER = LoggerFactory.getLogger(FullStartupTask.class);
-    
+	public int threadTotal = 23;
+	public ExecutorService service = Executors.newFixedThreadPool(threadTotal);
+	
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 	private String fullPath="/data/epiphany";
@@ -44,7 +49,12 @@ public class FullStartupTask  extends TimerTask {
 	public void setRedisNoKey(String redisNoKey) {
 		this.redisNoKey = redisNoKey;
 	}
-	
+
+	public void setThreadTotal(int threadTotal) {
+		this.threadTotal = threadTotal;
+		service = Executors.newFixedThreadPool(threadTotal);
+	}
+
 	@Override
 	public void run() {
 		redisTemplate.opsForValue().set(redisNoKey, "0");
@@ -64,7 +74,26 @@ public class FullStartupTask  extends TimerTask {
     		valueOperations.set(minKey, minId);
     	}
     	Startup.isRunning=true;
-    	for(int i=0; i<Startup.FULL_THREAD_TOTAL; i++) {
+    	List<Long> niceQueue = dataService.getNiceQueue();
+    	if(niceQueue!=null && !niceQueue.isEmpty()) {
+    		String numKey = new StringBuilder("n").append(redisNoKey).toString();
+    		redisTemplate.opsForValue().set(numKey, "0");
+    		String reverseListKey = new StringBuilder("r").append(redisNoKey).toString();
+    		redisTemplate.delete(reverseListKey);
+    		for(int i=1; i<=niceQueue.size(); i++) {
+    			String idstr = String.valueOf(niceQueue.get(i-1));
+    			redisTemplate.opsForHash().put(reverseListKey, String.valueOf(i), idstr);
+    		}
+        	for(int i=0; i<threadTotal; i++) {
+        		NiceQueueTask niceQueueTask = (NiceQueueTask) Startup.context.getBean("niceQueueTask");
+        		niceQueueTask.setThreadNo(i);
+        		niceQueueTask.setFullPath(fullPath);
+        		niceQueueTask.setDataService(dataService);
+        		niceQueueTask.setRedisNoKey(redisNoKey);
+        		service.execute(niceQueueTask);
+            }
+    	}
+    	for(int i=0; i<threadTotal; i++) {
     		FullBusinessTask fullBusinessTask = (FullBusinessTask) Startup.context.getBean("fullBusinessTask");
     		fullBusinessTask.setMinId(NumberUtils.toLong(minId));
     		fullBusinessTask.setMaxId(NumberUtils.toLong(maxId));
@@ -73,7 +102,7 @@ public class FullStartupTask  extends TimerTask {
     		fullBusinessTask.setDataService(dataService);
     		fullBusinessTask.setDealOneTime(dealOneTime);
     		fullBusinessTask.setRedisNoKey(redisNoKey);
-    		Startup.service.execute(fullBusinessTask);
+    		service.execute(fullBusinessTask);
         }
 	}
 

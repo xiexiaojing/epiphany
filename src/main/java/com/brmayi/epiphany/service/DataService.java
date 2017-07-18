@@ -22,7 +22,7 @@ import com.brmayi.epiphany.exception.EpiphanyException;
  */
 public interface DataService {
 	/**
-	 * 根据ID进行业务数据处理
+	 * 根据ID进行业务数据处理,因为增量和全量复用此接口，可以在实现类中做判断，如果path为null为增量，否则为全量
 	 * @param dealIds 处理ID
 	 * @param path 要保存到的磁盘路径，不需要保存磁盘，可以为null
 	 * @throws EpiphanyException 抛出通用异常
@@ -61,4 +61,11 @@ public interface DataService {
 	 * @throws EpiphanyException 抛出通用异常
 	 */
 	public long getMinId() throws EpiphanyException;
+	
+	/**
+	 * 取得优先运行的数据
+	 * @return 数据ID队列
+	 * @throws EpiphanyException 抛出通用异常
+	 */
+	public List<Long> getNiceQueue() throws EpiphanyException;
 }
