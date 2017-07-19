@@ -75,14 +75,18 @@ public class FullStartupTask  extends TimerTask {
     	}
     	Startup.isRunning=true;
     	List<Long> niceQueue = dataService.getNiceQueue();
+    	boolean hasPriority = false;
     	if(niceQueue!=null && !niceQueue.isEmpty()) {
     		String numKey = new StringBuilder("n").append(redisNoKey).toString();
     		redisTemplate.opsForValue().set(numKey, "0");
     		String reverseListKey = new StringBuilder("r").append(redisNoKey).toString();
     		redisTemplate.delete(reverseListKey);
+    		String prioritySetKey = new StringBuilder("ps").append(redisNoKey).toString();
+    		redisTemplate.delete(prioritySetKey);
     		for(int i=1; i<=niceQueue.size(); i++) {
     			String idstr = String.valueOf(niceQueue.get(i-1));
     			redisTemplate.opsForHash().put(reverseListKey, String.valueOf(i), idstr);
+    			redisTemplate.opsForSet().add(prioritySetKey, idstr);
     		}
         	for(int i=0; i<threadTotal; i++) {
         		NiceQueueTask niceQueueTask = (NiceQueueTask) Startup.context.getBean("niceQueueTask");
@@ -92,6 +96,7 @@ public class FullStartupTask  extends TimerTask {
         		niceQueueTask.setRedisNoKey(redisNoKey);
         		service.execute(niceQueueTask);
             }
+        	hasPriority = true;
     	}
     	for(int i=0; i<threadTotal; i++) {
     		FullBusinessTask fullBusinessTask = (FullBusinessTask) Startup.context.getBean("fullBusinessTask");
@@ -102,6 +107,7 @@ public class FullStartupTask  extends TimerTask {
     		fullBusinessTask.setDataService(dataService);
     		fullBusinessTask.setDealOneTime(dealOneTime);
     		fullBusinessTask.setRedisNoKey(redisNoKey);
+    		fullBusinessTask.setHasPriority(hasPriority);
     		service.execute(fullBusinessTask);
         }
 	}

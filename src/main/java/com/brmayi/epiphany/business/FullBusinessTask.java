@@ -3,6 +3,9 @@
  */
 package com.brmayi.epiphany.business;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.perf4j.StopWatch;
@@ -37,7 +40,6 @@ public class FullBusinessTask implements Runnable {
 	private final static Logger LOGGER = LoggerFactory.getLogger(FullBusinessTask.class);
 	
 	private static final String EMPTY = "";
-
 	private int threadNo=0;
 	private String fullPath="/data/epiphany";
     @Resource
@@ -47,6 +49,8 @@ public class FullBusinessTask implements Runnable {
 	private long maxId=20000;
 	private int dealOneTime = 200;
 	private String redisNoKey = "epiphanyNo";
+	
+	private boolean hasPriority = false;
 
 	public void setMinId(long minId) {
 		this.minId = minId;
@@ -76,6 +80,10 @@ public class FullBusinessTask implements Runnable {
 		this.redisNoKey = redisNoKey;
 	}
 
+	public void setHasPriority(boolean hasPriority) {
+		this.hasPriority = hasPriority;
+	}
+	
 	@Override
 	public void run() throws EpiphanyException {
 		Startup.threadNumber.incrementAndGet();
@@ -83,9 +91,21 @@ public class FullBusinessTask implements Runnable {
 		String path = new StringBuilder(pathWithDate).append(threadNo).toString();
 		long endThisTime = redisTemplate.opsForValue().increment(redisNoKey, dealOneTime);
 		long curId = minId+endThisTime-dealOneTime;
+		String prioritySetKey = new StringBuilder("ps").append(redisNoKey).toString();
 		while (curId <= maxId) {
 			StopWatch stopWatch = new Slf4JStopWatch(fullPath);
-			dataService.dealDataByBeginEnd(curId, minId+endThisTime, path);
+			if(hasPriority) {
+				List<Long> ids = dataService.getIdsByBeginEnd(curId, minId+endThisTime);
+				List<Long> dealIds = new ArrayList<Long>(ids.size());
+				for(Long id : ids) {
+					if(!redisTemplate.opsForSet().isMember(prioritySetKey, String.valueOf(id))) {
+						dealIds.add(id);
+					}
+				}
+				dataService.dealDataByIds(dealIds, path);
+			} else {
+				dataService.dealDataByBeginEnd(curId, minId+endThisTime, path);
+			}
 			stopWatch.stop();
 			endThisTime = redisTemplate.opsForValue().increment(redisNoKey, dealOneTime);
 			curId = endThisTime-dealOneTime;

@@ -39,6 +39,15 @@ public interface DataService {
 	public List<Long> getIds(String beginTime, String endTime) throws EpiphanyException;
 	
 	/**
+	 * 根据id区间获取id列表
+	 * @param beginId 开始ID 
+	 * @param endId 结束ID
+	 * @return id列表
+	 * @throws EpiphanyException 抛出通用异常
+	 */
+	public List<Long> getIdsByBeginEnd(long beginId, long endId) throws EpiphanyException;
+	
+	/**
 	 * 根据开始结束ID处理数据
 	 * @param beginId 开始ID 
 	 * @param endId 结束ID
