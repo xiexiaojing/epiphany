@@ -14,7 +14,23 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.brmayi.epiphany.common.Startup;
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.service.DataService;
-
+/**
+ * 
+ * 	增量执行逻辑类
+ *            
+ *            .==.       .==.
+ *           //'^\\     //^'\\
+ *          // ^^\(\__/)/^ ^^\\
+ *         //^ ^^ ^/6  6\ ^^^ \\
+ *        //^ ^^ ^/( .. )\^ ^^ \\
+ *       // ^^  ^/\|v""v|/\^^ ^ \\
+ *      // ^^/\/  / '~~' \ \/\^ ^\\
+ *      ----------------------------------------
+ *      HERE BE DRAGONS WHICH CAN CREATE MIRACLE
+ *       
+ *      @author 静儿(987489055@qq.com)
+ *
+ */
 public class IncrementBusinessTask implements Runnable{
 	private static final Logger logger = LoggerFactory.getLogger(IncrementBusinessTask.class);
 	public static final int MEMCAHE_EXPIRE_TIME = 24*3600;
@@ -28,7 +44,13 @@ public class IncrementBusinessTask implements Runnable{
     private DataService dataService;
     
     private String timeCacheKey="timeCacheKey";
-    
+	
+    private String fullIncModel = "yield";
+	
+    /**
+     * 缓存当前增量已执行过数据的时间戳key
+     * @param timeCacheKey
+     */
 	public void setTimeCacheKey(String timeCacheKey) {
 		this.timeCacheKey = timeCacheKey;
 	}
@@ -37,9 +59,19 @@ public class IncrementBusinessTask implements Runnable{
 		this.dataService = dataService;
 	}
 
+	/**
+	 * 全量和增量的运行模式：
+	 * 	both 共同执行模式
+	 *  yield 在执行全量时停止增量的运行，在全量执行完后接断点继续执行
+	 * @param fullIncModel 全量和增量的运行模式：both 共同执行模式， yield 在执行全量时停止增量的运行，在全量执行完后接断点继续执行,默认yield
+	 */
+	public void setFullIncModel(String fullIncModel) {
+		this.fullIncModel = fullIncModel;
+	}
+	
 	@Override
 	public void run() throws EpiphanyException{
-		if(Startup.isRunning) {
+		if("yield".equals(fullIncModel) && Startup.threadNumber.get()>0) {
 			return;
 		}
 		try {

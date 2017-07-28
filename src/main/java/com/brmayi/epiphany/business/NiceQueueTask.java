@@ -92,7 +92,6 @@ public class NiceQueueTask implements Runnable {
 			EpiphanyFileUtil.writeToFile(new StringBuilder(pathWithDate).append(division).append("success").toString(), EMPTY);
 			redisTemplate.delete(numKey);
 			redisTemplate.delete(reverseListKey);
-			Startup.isRunning =false;
 		}
 	}
 }

@@ -125,7 +125,6 @@ public class FullBusinessTask implements Runnable {
 			redisTemplate.delete(minKey);
 			redisTemplate.delete(numKey);
 			redisTemplate.delete(queueListKey);
-			Startup.isRunning =false;
 		}
 	}
 }

@@ -73,7 +73,6 @@ public class FullStartupTask  extends TimerTask {
     		minId = String.valueOf(dataService.getMinId());
     		valueOperations.set(minKey, minId);
     	}
-    	Startup.isRunning=true;
     	List<Long> niceQueue = dataService.getNiceQueue();
     	boolean hasPriority = false;
     	if(niceQueue!=null && !niceQueue.isEmpty()) {
