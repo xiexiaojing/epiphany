@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.Inflater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,34 @@ public class GzCompressUtil {
         compresser.end();  
         return output;  
     }
-    
+
+    /**
+     * 解压缩
+     *
+     * @param data 待压缩的数据
+     * @return byte[] 解压缩后的数据
+     */
+    public static byte[] decompress(byte[] data) {
+        byte[] output = new byte[0];
+
+        Inflater decompresser = new Inflater();
+        decompresser.reset();
+        decompresser.setInput(data);
+
+        try (ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);){
+            byte[] buf = new byte[1024];
+            while (!decompresser.finished()) {
+                int i = decompresser.inflate(buf);
+                o.write(buf, 0, i);
+            }
+            output = o.toByteArray();
+        } catch (Exception e) {
+            output = data;
+            e.printStackTrace();
+        }
+        decompresser.end();
+        return output;
+    }
 	/**
 	 * 执行gz压缩
 	 * @param path 文件路径

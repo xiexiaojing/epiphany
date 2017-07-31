@@ -9,6 +9,8 @@ import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.brmayi.epiphany.exception.EpiphanyException;
+
 /**
  * 		文件处理工具类
  * 
@@ -69,7 +71,7 @@ public class EpiphanyFileUtil {
      * @param path 文件全路径
      * @param content 写入内容
      */
-	public static void writeToFile(String path, String content) {
+	public static void writeToFile(String path, String content) throws EpiphanyException{
     	try (RandomAccessFile randomFile = new RandomAccessFile(path, "rw");){// 打开一个随机访问文件流，按读写方式
             // 文件长度，字节数
             long fileLength = randomFile.length();
@@ -78,6 +80,7 @@ public class EpiphanyFileUtil {
             randomFile.write(content.getBytes("UTF8"));
         } catch (IOException e) {
         	LOGGER.error("写入全量专辑文件失败", e);
+        	throw new EpiphanyException(e);
         }
     }
 }
