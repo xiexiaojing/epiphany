@@ -57,6 +57,7 @@ public class FullStartupTask  extends TimerTask {
 
 	@Override
 	public void run() {
+		clearRedis();
 		redisTemplate.opsForValue().set(redisNoKey, "0");
 		clearData();
 		EpiphanyFileUtil.createPath(fullPath);
@@ -158,5 +159,16 @@ public class FullStartupTask  extends TimerTask {
         boolean isDeleted = dir.delete();
         LOGGER.info("删除目录"+dir.getName()+(isDeleted?"成功":"失败"));
         return isDeleted;
+    }
+    
+    private void clearRedis(){
+    	String maxKey = new StringBuilder("max").append(redisNoKey).toString();
+		String minKey = new StringBuilder("min").append(redisNoKey).toString();
+		String numKey = new StringBuilder("n").append(redisNoKey).toString();
+		String queueListKey = new StringBuilder("l").append(redisNoKey).toString();
+		redisTemplate.delete(maxKey);
+		redisTemplate.delete(minKey);
+		redisTemplate.delete(numKey);
+		redisTemplate.delete(queueListKey);
     }
 }
