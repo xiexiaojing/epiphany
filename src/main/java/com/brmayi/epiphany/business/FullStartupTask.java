@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import com.brmayi.epiphany.business.common.RedisUtils;
 import com.brmayi.epiphany.common.Startup;
 import com.brmayi.epiphany.service.DataService;
 import com.brmayi.epiphany.util.EpiphanyFileUtil;
@@ -57,7 +58,7 @@ public class FullStartupTask  extends TimerTask {
 
 	@Override
 	public void run() {
-		clearRedis();
+		RedisUtils.clearRedis(redisTemplate,redisNoKey);
 		redisTemplate.opsForValue().set(redisNoKey, "0");
 		clearData();
 		EpiphanyFileUtil.createPath(fullPath);
@@ -121,7 +122,7 @@ public class FullStartupTask  extends TimerTask {
                if(dir.isDirectory()) {
             	   String[] dateDirs = dir.list();
             	   for(int j=0; j<dateDirs.length; j++) {
-            		   if(dateDirs[j]!=null) {
+            		   if(dateDirs[j]!=null && NumberUtils.isNumber(dateDirs[j])) {
 	            		   Date date = null;
 						   try {
 							date = sdfForDir.parse(dateDirs[j]);
@@ -160,15 +161,5 @@ public class FullStartupTask  extends TimerTask {
         LOGGER.info("删除目录"+dir.getName()+(isDeleted?"成功":"失败"));
         return isDeleted;
     }
-    
-    private void clearRedis(){
-    	String maxKey = new StringBuilder("max").append(redisNoKey).toString();
-		String minKey = new StringBuilder("min").append(redisNoKey).toString();
-		String numKey = new StringBuilder("n").append(redisNoKey).toString();
-		String queueListKey = new StringBuilder("l").append(redisNoKey).toString();
-		redisTemplate.delete(maxKey);
-		redisTemplate.delete(minKey);
-		redisTemplate.delete(numKey);
-		redisTemplate.delete(queueListKey);
-    }
+
 }

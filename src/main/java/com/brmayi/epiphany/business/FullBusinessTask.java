@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import com.brmayi.epiphany.business.common.RedisUtils;
 import com.brmayi.epiphany.common.Startup;
 import com.brmayi.epiphany.exception.EpiphanyException;
 import com.brmayi.epiphany.service.DataService;
@@ -117,14 +118,7 @@ public class FullBusinessTask implements Runnable {
 			LOGGER.info("fullExecute generate success");
 			String division = fullPath.substring(fullPath.lastIndexOf("/")+1, fullPath.length());
 			EpiphanyFileUtil.writeToFile(new StringBuilder(pathWithDate).append(division).append("success").toString(), EMPTY);
-			String maxKey = new StringBuilder("max").append(redisNoKey).toString();
-			String minKey = new StringBuilder("min").append(redisNoKey).toString();
-			String numKey = new StringBuilder("n").append(redisNoKey).toString();
-			String queueListKey = new StringBuilder("l").append(redisNoKey).toString();
-			redisTemplate.delete(maxKey);
-			redisTemplate.delete(minKey);
-			redisTemplate.delete(numKey);
-			redisTemplate.delete(queueListKey);
+			RedisUtils.clearRedis(redisTemplate,redisNoKey);
 		}
 	}
 }
